@@ -1,7 +1,8 @@
 const chatForm = document.getElementById("chatForm");
 const chatBox = document.getElementById("chat");
 
-const API_URL = "https://your-project-name.vercel.app/api/evaluate"; // <-- Replace with your Vercel URL
+// Replace with your Vercel backend URL
+const API_URL = "https://your-project-name.vercel.app/api/evaluate";
 
 chatForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -9,7 +10,7 @@ chatForm.addEventListener("submit", async (e) => {
     const msg = input.value.trim();
     if (!msg) return;
 
-    // Add user message
+    // Show user message
     const userBubble = document.createElement("div");
     userBubble.classList.add("message", "user");
     userBubble.textContent = msg;
@@ -26,7 +27,7 @@ chatForm.addEventListener("submit", async (e) => {
         });
         const data = await response.json();
 
-        // Add AI reply
+        // Show AI reply
         const aiBubble = document.createElement("div");
         aiBubble.classList.add("message", "ai");
         aiBubble.textContent = data.reply;
