@@ -4,22 +4,130 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Basketball Bet Evaluator</title>
-<link rel="stylesheet" href="styles.css">
+<style>
+body {
+    font-family: 'Arial', sans-serif;
+    background: #1E1E2F;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 25px 30px;
+    background: linear-gradient(145deg, #1E1E2F, #252540);
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+h1 {
+    text-align: center;
+    color: #F2B134;
+    margin-bottom: 30px;
+}
+input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+}
+input, select {
+    background: #2A2A40;
+    color: #fff;
+}
+button {
+    margin-top: 20px;
+    background: #F2B134;
+    color: #1E1E2F;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover {
+    background: #e0a823;
+}
+#result {
+    margin-top: 25px;
+    padding: 15px;
+    background: #2A2A40;
+    border-radius: 10px;
+    line-height: 1.5;
+}
+.verdict {
+    font-size: 18px;
+    font-weight: bold;
+}
+</style>
 </head>
 <body>
-  <div class="container">
+<div class="container">
     <h1>Basketball Bet Evaluator</h1>
     <form id="betForm">
-      <input type="text" name="league" placeholder="League (NBA)" required>
-      <input type="text" name="home_team" placeholder="Home Team" required>
-      <input type="text" name="away_team" placeholder="Away Team" required>
-      <input type="text" name="market_type" placeholder="Market Type (Spread/ML/Total)" required>
-      <input type="number" name="odds" step="0.01" placeholder="Odds (decimal)" required>
-      <input type="number" name="model_prob" step="0.01" placeholder="Model Probability (optional)">
-      <button type="submit">Evaluate Bet</button>
+        <input type="text" name="league" placeholder="League (NBA)" required>
+        <input type="text" name="home_team" placeholder="Home Team" required>
+        <input type="text" name="away_team" placeholder="Away Team" required>
+        <input type="text" name="market_type" placeholder="Market Type (Spread/ML/Total)" required>
+        <input type="number" name="odds" step="0.01" placeholder="Odds (decimal)" required>
+        <input type="number" name="model_prob" step="0.01" placeholder="Model Probability (optional)">
+        <button type="submit">Evaluate Bet</button>
     </form>
     <div id="result"></div>
-  </div>
-  <script src="app.js"></script>
+</div>
+
+<script>
+const form = document.getElementById("betForm");
+const resultDiv = document.getElementById("result");
+
+// Replace this with your actual Vercel backend URL
+const API_URL = "https://your-project-name.vercel.app/api/evaluate";
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    resultDiv.innerHTML = "<p>Loading...</p>";
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error("Backend error");
+
+        const aiData = await response.json();
+        displayResult(aiData);
+
+    } catch (err) {
+        resultDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+    }
+});
+
+function displayResult(data) {
+    const verdictColor = data.verdict === "Good Value" ? "#4CAF50"
+                        : data.verdict === "Fair" ? "#FFC107"
+                        : "#F44336";
+
+    resultDiv.innerHTML = `
+        <div style="background:#2A2A40; padding:15px; border-radius:10px;">
+            <p class="verdict" style="color:${verdictColor};">
+                Verdict: ${data.verdict}
+            </p>
+            <p>Edge %: ${data.edge_percentage}</p>
+            <p>Confidence: ${data.confidence}</p>
+            <p>Reasons:</p>
+            <ul>${data.reasons.map(r => `<li>${r}</li>`).join("")}</ul>
+            <p>Risks:</p>
+            <ul>${data.risks.map(r => `<li>${r}</li>`).join("")}</ul>
+            <p>Explanation:</p>
+            <p>${data.explanation}</p>
+        </div>
+    `;
+}
+</script>
 </body>
 </html>
